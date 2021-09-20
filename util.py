@@ -3,6 +3,9 @@ import logging
 import yaml
 import datetime
 import re
+import os
+import subprocess
+import gc
 
 def read_config(path):
     with open(path, 'r') as stream:
@@ -11,26 +14,28 @@ def read_config(path):
         except yaml.YAMLError as exc:
             logging.error(exc)
             
-def whitespace_remover(dataframe):
-    for i in dataframe.columns:
-        if dataframe[i].dtype == 'object':
-            dataframe[i] = dataframe[i].map(str.strip)
-       
+def replacer(string, char):
+    pattern = char + '{2,}'
+    string = re.sub(pattern, char, string) 
+    return string
+
             
 def col_header_val(df, table_config):
-    whitespace_remover(db)
     df.columns = df.columns.str.lower()
-    expected_col = list(map(lambda x: x.lower(), table_config['columns']))
+    df.columns = df.columns.str.replace('[^\w]','_',regex=True)
+    df.columns = list(map(lambda x: x.strip('_'), list(df.columns)))
+    df.columns = list(map(lambda x: replacer(x,'_'), list(df.columns)))
+    expected_col = list(map(lambda x: x.lower(),  table_config['columns']))
     expected_col.sort()
-    df.columns = list(map(lambda x: x.lower(), list(df.columns)))
+    df.columns =list(map(lambda x: x.lower(), list(df.columns)))
     df = df.reindex(sorted(df.columns), axis=1)
     
-    if len(df.coluns) == lend(expected_col) and list(expected_col) == list(df.columns):
+    if len(df.columns) == len(expected_col) and list(expected_col) == list(df.columns):
         print('Columns names and length validattion passed!')
         return 1
     else:
         print('Column names and length validation failed')
-        mismatched_columns_file = list(ser(df.columns).difference(expected_col))
+        mismatched_columns_file = list(set(df.columns).difference(expected_col))
         print(f'The following file columns are not present in the YAML file: {mismatched_columns_file}')
         missing_YAML_file = list(set(expected_col).difference(df.columns))
         print(f'The following YAML columns are not in the uploaded file: {missing_YAML_file}')
