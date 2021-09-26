@@ -1,11 +1,7 @@
-import pandas as pd
 import logging
 import yaml
-import datetime
 import re
 from os.path import getsize
-import subprocess
-import gc
 import gzip
 
 def read_config(path):
@@ -50,7 +46,7 @@ def check_results(validation, df, name):
     else:
         print('Validation passed')
         make_file(df, name)
-        df_info(df, name)
+        
         
     
 def make_file(df, name):
@@ -64,9 +60,10 @@ def make_file(df, name):
 
     
 def df_info(df, name):
-    path = f'{name}.yaml'
+    path = f'{name}.csv'
+    size = getsize(path) / 1024**2
     print(f"""
     Number of columns: {len(df.columns)}
     Number of rows: {len(df)}
-    File size: get_size(path)
+    File size: {round(size, 2)}MB 
     """)   
