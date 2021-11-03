@@ -40,23 +40,23 @@ def col_header_val(df, table_config):
         logging.info(f'expected_columns: {expected_col}')
         return 0
 
-def check_results(validation, df, name):    
+def check_results(validation, df, name, delimiter):    
     if validation == 0:
         print('Validation failed')
     else:
         print('Validation passed')
-        make_file(df, name)
+        make_file(df, name, delimiter)
         
         
     
-def make_file(df, name):
-    text = yaml.dump(
-    df.reset_index().to_dict(orient='records'),
-    sort_keys=False, width=72, indent=4,
-    default_flow_style=None)
-    f = gzip.open(f'{name}.txt.gz', 'wb')
-    f.write(text)
-    f.close()
+def make_file(df, outgoing , delimiter):
+    outgoing_name = outgoing + '.txt'
+    df.to_csv(outgoing_name, header=None, index=None, sep=delimiter, mode='a')
+    f_in = open(outgoing_name , 'rb')
+    f_out = gzip.open(f'{outgoing}.txt.gz', 'wb')
+    f_out.writelines(f_in)
+    f_out.close()
+    f_in.close()
 
     
 def df_info(df, name):
